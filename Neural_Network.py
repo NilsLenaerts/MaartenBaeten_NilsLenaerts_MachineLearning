@@ -24,6 +24,8 @@ from skimage import color
 from skimage import io
 from skimage.transform import rescale, resize, downscale_local_mean
 
+import os
+
 def sigmoid(x):
     return 1/(1 + np.exp(-x))
     
@@ -183,17 +185,18 @@ def nnCostFunction(nn_params,
     # Unroll gradients
     # grad = np.concatenate([Theta1_grad.ravel(order=order), Theta2_grad.ravel(order=order)])
     grad = np.concatenate([Theta1_grad.ravel(), Theta2_grad.ravel()])
-    print("Completed costfunction")
+    print("Completed Cost")
     return J, grad
 
 
-X_size = 14284 #2046 validation 14284 train 2039 valid which are 691200 and 14284 which are 691200 
+#X_size = 14284 #2046 validation 14284 train 2039 valid which are 691200 and 14284 which are 691200 
 Gray_size = 57600  #230400
 
 
 
 #gray_arrays, labels,j = loadImages.load(True)
-x_train, y_train, x_val, y_val = loadImages.load(True)
+x_train, y_train, x_val, y_val = loadImages.load(False)
+
 #X_t = np.concatenate([np.ones((X_size, 1)), gray_arrays], axis=1)
 # print(X_t)
 
@@ -223,14 +226,14 @@ lambda_ = 0.01
 # utils.checkNNGradients(nnCostFunction, lambda_)
 
 # Also output the costFunction debugging values
-debug_J, _  = nnCostFunction(nn_params, input_layer_size, hidden_layer_size, num_labels, x_train, y_train, lambda_)
+#debug_J, _  = nnCostFunction(nn_params, input_layer_size, hidden_layer_size, num_labels, x_train, y_train, lambda_)
 
-print('\n\nCost at (fixed) debugging parameters (w/ lambda = %f): %f ' % (lambda_, debug_J))
-print('(for lambda = 3, this value should be about 0.576051)')
+#print('\n\nCost at (fixed) debugging parameters (w/ lambda = %f): %f ' % (lambda_, debug_J))
+#print('(for lambda = 3, this value should be about 0.576051)')
 
     #  After you have completed the assignment, change the maxiter to a larger
 #  value to see how more training helps.
-options= {'maxfun': 100}
+options= {'maxfun': 10}
 
 #  You should also try different values of lambda
 lambda_ = 0.01
@@ -241,7 +244,7 @@ costFunction = lambda p: nnCostFunction(p, input_layer_size, hidden_layer_size, 
 # Now, costFunction is a function that takes in only one argument
 # (the neural network parameters)
 res = optimize.minimize(costFunction, initial_nn_params, jac=True, method='TNC', options=options)
-
+print("Optimized")
 # get the solution of the optimization
 nn_params = res.x
         
@@ -251,6 +254,30 @@ Theta1 = np.reshape(nn_params[:hidden_layer_size * (input_layer_size + 1)],
 
 Theta2 = np.reshape(nn_params[(hidden_layer_size * (input_layer_size + 1)):],
                     (num_labels, (hidden_layer_size + 1)))
+'''
+Theta1 = np.load("arrays/theta1.npy")
+Theta2 = np.load("arrays/theta2.npy")
+
+np.save("arrays/theta1.npy", Theta1)
+np.save("arrays/theta2.npy", Theta2)
+'''
 
 pred = utils.predict(Theta1, Theta2, x_train)
-print('Training Set Accuracy: %f' % (np.mean(pred == y_train.index(1)) * 100))
+y = np.zeros(y_train.shape[0])
+for i in range(y_train.shape[0]):
+    for j in range(len(y_train[i])):
+        if(y_train[i][j] == 1):
+            y[i] = j
+
+debug_J, _  = nnCostFunction(nn_params, input_layer_size, hidden_layer_size, num_labels, x_train, y_train, lambda_)
+print('\n\nCost at (fixed) debugging parameters (w/ lambda = %f): %f ' % (lambda_, debug_J))
+
+print('Training Set Accuracy: %f' % (np.mean(pred == y)  * 100))
+
+pred = utils.predict(Theta1, Theta2, x_val)
+y = np.zeros(y_val.shape[0])
+for i in range(y_val.shape[0]):
+    for j in range(len(y_val[i])):
+        if(y_val[i][j] == 1):
+            y[i] = j
+print('Validation Set Accuracy: %f' % (np.mean(pred == y)  * 100))

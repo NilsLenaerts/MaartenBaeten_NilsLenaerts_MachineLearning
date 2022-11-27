@@ -27,17 +27,20 @@ def loadData():
     for root, dirs, files in os.walk('grayscale/dice/valid'):
         if files:
             v += len(files)
+    v = 100*6
+    m = 200*6
     x_train = np.zeros((m,n))
     y_train = np.zeros((m,k))
     x_val = np.zeros((v,n))
     y_val = np.zeros((v,k))
-    
+    valAmount = 0
+    trainAmount = 0
     # convert images to 1d array and add them to the correct list
     for i in ["valid", "train"]:
-        for j in diceTypes:
-            valAmount = 0
-            trainAmount = 0
-            dirPath = "grayscale/dice/" + i + "/" + j + "/*.jpg"
+        for j in range(len(diceTypes)):
+            inLoopVal = 0
+            inLoopTrain = 0
+            dirPath = "grayscale/dice/" + i + "/" + diceTypes[j] + "/*.jpg"
             images = glob.glob(dirPath)
             print("Loading images from: ",dirPath)
             for file in images:
@@ -47,21 +50,23 @@ def loadData():
                     continue
                 unrolled = img.flatten()/255
                 yarray = np.zeros(6)
-                yarray[diceTypes.index(j)] = 1
+                yarray[j] = 1
                 if(i == "valid"):
+                    if(inLoopVal >= 100):
+                        break
                     x_val[valAmount] = unrolled
                     y_val[valAmount] = yarray
-                    v +=1
+                    inLoopVal +=1
                     valAmount +=1
-                    if(valAmount >= 10000):
-                        break
+                    
                 else:
+                    if(inLoopTrain >= 200):
+                        break
                     x_train[trainAmount] = unrolled
                     y_train[trainAmount] = yarray
-                    m +=1
+                    inLoopTrain +=1
                     trainAmount +=1
-                    if(trainAmount >= 20000):
-                        break
+                    
 
     
 
