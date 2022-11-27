@@ -21,7 +21,12 @@ def loadData():
     
     # k is the number of categories, there are 6 different types of dice
     k = 6
-
+    for root, dirs, files in os.walk('grayscale/dice/train'):
+        if files:
+            m += len(files)
+    for root, dirs, files in os.walk('grayscale/dice/valid'):
+        if files:
+            v += len(files)
     x_train = np.zeros((m,n))
     y_train = np.zeros((m,k))
     x_val = np.zeros((v,n))
@@ -38,21 +43,21 @@ def loadData():
             for file in images:
                 img = cv.imread(file,0)
                 if (img.shape != (240,240)):
-                    print("To big")
+                    print("{0} To big removed the file".format(file))
                     continue
                 unrolled = img.flatten()/255
                 yarray = np.zeros(6)
                 yarray[diceTypes.index(j)] = 1
                 if(i == "valid"):
-                    x_val = np.vstack([x_val,unrolled])
-                    y_val = np.vstack([y_val,yarray])
+                    x_val[valAmount] = unrolled
+                    y_val[valAmount] = yarray
                     v +=1
                     valAmount +=1
                     if(valAmount >= 10000):
                         break
                 else:
-                    x_train = np.vstack([x_train,unrolled])
-                    y_train = np.vstack([y_train,yarray])
+                    x_train[trainAmount] = unrolled
+                    y_train[trainAmount] = yarray
                     m +=1
                     trainAmount +=1
                     if(trainAmount >= 20000):
@@ -61,11 +66,8 @@ def loadData():
     
 
 
-    return x_train,y_train, x_val, y_val, m,v
-
-if __name__ == "__main__":
-    print("Called from cmd")
-    # Change current directory to the Data folder which houses all images
+    return x_train,y_train, x_val, y_val
+def load(LoadFormFile):
     os.chdir("Data/")
     loadFromFile = True
     if(loadFromFile):
@@ -73,14 +75,16 @@ if __name__ == "__main__":
         y_train = np.load("arrays/y_train.npy")
         x_val = np.load("arrays/x_val.npy")
         y_val = np.load("arrays/y_val.npy")
-        pass
+        return x_train,y_train, x_val, y_val
     else:
-        x_train,y_train, x_val, y_val, m,v = loadData()
-        np.save("arrays/x_train", x_train)
-        np.save("arrays/y_train", y_train)
-        np.save("arrays/x_val", x_val)
-        np.save("arrays/y_val", y_val)
+        return loadData()
+        
 
+if __name__ == "__main__":
+    print("Called from cmd")
+    # Change current directory to the Data folder which houses all images
+    
+    x_train,y_train, x_val, y_val = load(True)
     print(x_train.shape)
     print(y_train.shape)
     #print(m)

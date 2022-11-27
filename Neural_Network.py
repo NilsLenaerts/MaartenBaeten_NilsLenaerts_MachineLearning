@@ -1,6 +1,3 @@
-# used for manipulating directory paths
-import os
-
 # Scientific and vector computation for python
 import numpy as np
 from numpy import asarray
@@ -20,8 +17,8 @@ from scipy.io import loadmat
 
 # library written for this exercise providing additional functions for assignment submission, and others
 import utils
-# importing os module 
-import os 
+
+import loadImages
 
 from skimage import color
 from skimage import io
@@ -103,57 +100,15 @@ def nnCostFunction(nn_params, input_layer_size, hidden_layer_size, num_labels, X
 X_size = 14284 #2046 validation 14284 train 2039 valid which are 691200 and 14284 which are 691200 
 Gray_size = 57600  #230400
 
-def loadData(directory_path):
-    labels = np.zeros((X_size))
-    gray_arrays = np.zeros((X_size,Gray_size))
-    directory_path
-    ext = ('.jpg')
-    i = 0
-    j = 0
-    for directory in os.listdir(directory_path):
-        newPath = directory_path + '/' + directory
-        for file in os.listdir(newPath):
-            if file.endswith(ext):
-                path = newPath + '/' + file
-
-                img = io.imread(path)
-                if(img.size == 691200):
-                    imgGray = color.rgb2gray(img)
-                    res_img = rescale(imgGray, 0.5, anti_aliasing=False)
-                    imgn = np.reshape(res_img,(1,Gray_size),order='F')
-                    gray_arrays[i] = np.float32(imgn)
-                    type = directory
-                    match type:
-                        case 'd4':
-                            labels[i]=int(0)
-                        case 'd6':
-                            labels[i]=int(1)
-                        case 'd8':
-                            labels[i]=int(2)
-                        case 'd10':
-                            labels[i]=int(3)
-                        case 'd12':
-                            labels[i]=int(4)
-                        case 'd20':
-                            labels[i]=int(5) 
-                else:
-                    continue
-
-                i = i + 1   
-                j=j+1                                                                                                                
-            else:
-                continue
-    i = 0
-
-    return gray_arrays, labels,j
 
 
-gray_arrays, labels,j = loadData(r"/home/nils/Documents/school/schooljaar-2022_2023/MACLE_4483/MaartenBaeten_NilsLenaerts_MachineLearning/Data/dice-d4-d6-d8-d10-d12-d20/dice/train")
-X_t = np.concatenate([np.ones((X_size, 1)), gray_arrays], axis=1)
+#gray_arrays, labels,j = loadImages.load(True)
+x_train, y_train, x_val, y_val = loadImages.load(True)
+#X_t = np.concatenate([np.ones((X_size, 1)), gray_arrays], axis=1)
 # print(X_t)
 
 labels_int = labels.astype(int)
-X = X_t
+X = x_train
 y_t = labels_int
 y = labels_int
 print(y)
