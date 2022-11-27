@@ -67,9 +67,9 @@ def loadData():
 
 
     return x_train,y_train, x_val, y_val
-def load(LoadFormFile):
+def load(loadFromFile):
     os.chdir("Data/")
-    loadFromFile = True
+    
     if(loadFromFile):
         x_train = np.load("arrays/x_train.npy")
         y_train = np.load("arrays/y_train.npy")
@@ -77,14 +77,19 @@ def load(LoadFormFile):
         y_val = np.load("arrays/y_val.npy")
         return x_train,y_train, x_val, y_val
     else:
-        return loadData()
+        x_train,y_train, x_val, y_val = loadData()
+        np.save("arrays/x_train",x_train)
+        np.save("arrays/y_train",y_train)
+        np.save("arrays/x_val",x_val)
+        np.save("arrays/y_val",y_val)
+        return x_train,y_train, x_val, y_val
         
 
 if __name__ == "__main__":
     print("Called from cmd")
     # Change current directory to the Data folder which houses all images
     
-    x_train,y_train, x_val, y_val = load(True)
+    x_train,y_train, x_val, y_val = load(False)
     print(x_train.shape)
     print(y_train.shape)
     #print(m)
