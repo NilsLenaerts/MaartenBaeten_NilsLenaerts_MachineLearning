@@ -100,6 +100,11 @@ def predictOneVsAll(all_theta, X):
 
 def main():
     x_train, y_train, x_val, y_val = loadImages.loadData()
+    y = np.zeros(y_train.shape[0])
+    for i in range(y_train.shape[0]):
+        for j in range(len(y_train[i])):
+            if (y_train[i][j] == 1):
+                y[i] = j
 
     num_labels = 6
 
@@ -107,17 +112,17 @@ def main():
     theta_t = np.zeros(3600)
 
     # test value for the regularization parameter
-    lambda_t = 0.01
+    lambda_t = 0.3
 
-    J, grad = lrCostFunction(theta_t, x_train, y_train, lambda_t)
+    J, grad = lrCostFunction(theta_t, x_train, y, lambda_t)
     print('Cost         : {:.6f}'.format(J))
     print(' [{:.6f}, {:.6f}, {:.6f}, {:.6f}]'.format(*grad))
 
-    lambda_ = 0.001
-    all_theta = oneVsAll(x_train, y_train, num_labels, lambda_)
+    lambda_ = 0.3
+    all_theta = oneVsAll(x_train, y, num_labels, lambda_)
     pred = predictOneVsAll(all_theta, x_train)
     print('Training Set Accuracy: {:.2f}%'.format(
-        np.mean(pred == y_train) * 100))
+        np.mean(pred == y) * 100))
 
 
 main()
