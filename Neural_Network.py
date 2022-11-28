@@ -194,7 +194,7 @@ def nnCostFunction(nn_params,
 
 
 #X_size = 14284 #2046 validation 14284 train 2039 valid which are 691200 and 14284 which are 691200 
-Gray_size = 57600  #230400
+#Gray_size = 57600  #230400
 
 
 
@@ -211,7 +211,7 @@ x_train, y_train, x_val, y_val = loadImages.loadData()
 #print(y)
 # Setup the parameters you will use for this exercise
 input_layer_size  = 60*60 #57600  # Input Images of Digits
-hidden_layer_size = 100   # 25 hidden units
+hidden_layer_size = 150   # 25 hidden units
 num_labels = 6         # 10 labels, from 0 to 9
 print(len(y_train))
 print(y_train)
@@ -238,10 +238,10 @@ lambda_ = 0.01
 
     #  After you have completed the assignment, change the maxiter to a larger
 #  value to see how more training helps.
-options= {'maxfun': 1600}
+options= {'maxfun': 800}
 
 #  You should also try different values of lambda
-lambda_ = 0.01
+lambda_ = 1
 
 # Create "short hand" for the cost function to be minimized
 costFunction = lambda p: nnCostFunction(p, input_layer_size, hidden_layer_size, num_labels, x_train, y_train, lambda_)
@@ -263,8 +263,8 @@ Theta2 = np.reshape(nn_params[(hidden_layer_size * (input_layer_size + 1)):],
 Theta1 = np.load("arrays/theta1.npy")
 Theta2 = np.load("arrays/theta2.npy")
 '''
-np.save("arrays/theta1_all_60_100_1600.npy", Theta1)
-np.save("arrays/theta2_all_60_100_1600.npy", Theta2)
+np.save("arrays/theta1_all_60_150_800_1.npy", Theta1)
+np.save("arrays/theta2_all_60_150_800_1.npy", Theta2)
 
 
 pred = utils.predict(Theta1, Theta2, x_train)
