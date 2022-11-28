@@ -11,10 +11,10 @@ for i in ["valid", "train"]:
         print(dirPath)
         for file in images:
             img = cv.imread(file,0) 
-            img = cv.resize(img,dsize=None,fx = 0.5,fy= 0.5,interpolation= cv.INTER_AREA)
-            if(img.shape != (240,240)):
+            if(img.shape != (480,480)):
                 print("image to big: ", file)
                 continue
+            img = cv.resize(img,dsize=None,fx = 0.125,fy= 0.125,interpolation= cv.INTER_AREA)
             path = "grayscale/"+ file
             cv.imwrite(path, img)
 

@@ -206,9 +206,10 @@ x_train, y_train, x_val, y_val = loadImages.load(False)
 #y = labels_int
 #print(y)
 # Setup the parameters you will use for this exercise
-input_layer_size  = 57600  # Input Images of Digits
-hidden_layer_size = 600   # 25 hidden units
+input_layer_size  = 60*60 #57600  # Input Images of Digits
+hidden_layer_size = 100   # 25 hidden units
 num_labels = 6         # 10 labels, from 0 to 9
+print(len(y_train))
 print(y_train)
 print('Initializing Neural Network Parameters ...')
 initial_Theta1 = randInitializeWeights(input_layer_size, hidden_layer_size)
@@ -233,7 +234,7 @@ lambda_ = 0.01
 
     #  After you have completed the assignment, change the maxiter to a larger
 #  value to see how more training helps.
-options= {'maxfun': 10}
+options= {'maxfun': 100}
 
 #  You should also try different values of lambda
 lambda_ = 0.01
@@ -257,10 +258,10 @@ Theta2 = np.reshape(nn_params[(hidden_layer_size * (input_layer_size + 1)):],
 '''
 Theta1 = np.load("arrays/theta1.npy")
 Theta2 = np.load("arrays/theta2.npy")
-
-np.save("arrays/theta1.npy", Theta1)
-np.save("arrays/theta2.npy", Theta2)
 '''
+np.save("arrays/theta1_all_60_100_100.npy", Theta1)
+np.save("arrays/theta2_all_60_100_100.npy", Theta2)
+
 
 pred = utils.predict(Theta1, Theta2, x_train)
 y = np.zeros(y_train.shape[0])

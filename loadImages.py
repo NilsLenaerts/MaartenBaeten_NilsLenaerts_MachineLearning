@@ -17,7 +17,7 @@ def loadData():
 
     # n is the amount of features the data has, in our case it is the amount of pixels in a photo
     # we are currently only using pictures of size 240x240
-    n = (240*240)
+    n = (60*60)
     
     # k is the number of categories, there are 6 different types of dice
     k = 6
@@ -27,8 +27,8 @@ def loadData():
     for root, dirs, files in os.walk('grayscale/dice/valid'):
         if files:
             v += len(files)
-    v = 100*6
-    m = 200*6
+    #v = 50*6
+    #m = 100*6
     x_train = np.zeros((m,n))
     y_train = np.zeros((m,k))
     x_val = np.zeros((v,n))
@@ -45,14 +45,14 @@ def loadData():
             print("Loading images from: ",dirPath)
             for file in images:
                 img = cv.imread(file,0)
-                if (img.shape != (240,240)):
+                if (img.shape != (60,60)):
                     print("{0} To big removed the file".format(file))
                     continue
                 unrolled = img.flatten()/255
                 yarray = np.zeros(6)
                 yarray[j] = 1
                 if(i == "valid"):
-                    if(inLoopVal >= 100):
+                    if(inLoopVal >=  5000):
                         break
                     x_val[valAmount] = unrolled
                     y_val[valAmount] = yarray
@@ -60,7 +60,7 @@ def loadData():
                     valAmount +=1
                     
                 else:
-                    if(inLoopTrain >= 200):
+                    if(inLoopTrain >= 10000):
                         break
                     x_train[trainAmount] = unrolled
                     y_train[trainAmount] = yarray
