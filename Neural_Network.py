@@ -26,6 +26,8 @@ from skimage.transform import rescale, resize, downscale_local_mean
 
 import os
 
+progress = 1
+
 def sigmoid(x):
     return 1/(1 + np.exp(-x))
     
@@ -185,7 +187,9 @@ def nnCostFunction(nn_params,
     # Unroll gradients
     # grad = np.concatenate([Theta1_grad.ravel(order=order), Theta2_grad.ravel(order=order)])
     grad = np.concatenate([Theta1_grad.ravel(), Theta2_grad.ravel()])
-    print("Completed Cost")
+    global progress
+    print("Completed Cost ", progress)
+    progress +=1
     return J, grad
 
 
@@ -195,7 +199,7 @@ Gray_size = 57600  #230400
 
 
 #gray_arrays, labels,j = loadImages.load(True)
-x_train, y_train, x_val, y_val = loadImages.load(False)
+x_train, y_train, x_val, y_val = loadImages.loadData()
 
 #X_t = np.concatenate([np.ones((X_size, 1)), gray_arrays], axis=1)
 # print(X_t)
@@ -234,7 +238,7 @@ lambda_ = 0.01
 
     #  After you have completed the assignment, change the maxiter to a larger
 #  value to see how more training helps.
-options= {'maxfun': 100}
+options= {'maxfun': 1600}
 
 #  You should also try different values of lambda
 lambda_ = 0.01
@@ -259,8 +263,8 @@ Theta2 = np.reshape(nn_params[(hidden_layer_size * (input_layer_size + 1)):],
 Theta1 = np.load("arrays/theta1.npy")
 Theta2 = np.load("arrays/theta2.npy")
 '''
-np.save("arrays/theta1_all_60_100_100.npy", Theta1)
-np.save("arrays/theta2_all_60_100_100.npy", Theta2)
+np.save("arrays/theta1_all_60_100_1600.npy", Theta1)
+np.save("arrays/theta2_all_60_100_1600.npy", Theta2)
 
 
 pred = utils.predict(Theta1, Theta2, x_train)

@@ -6,7 +6,7 @@ import os
 
 diceTypes = ["d4","d6","d8","d10","d12","d20"]
 def loadData():
-
+    os.chdir("Data/")
     # m is the amount of training data in the dataset , in this case the amount of pictures.
     # This will be increased for every picture that is read
     m = 0
@@ -67,34 +67,13 @@ def loadData():
                     inLoopTrain +=1
                     trainAmount +=1
                     
-
-    
-
-
     return x_train,y_train, x_val, y_val
-def load(loadFromFile):
-    os.chdir("Data/")
-    
-    if(loadFromFile):
-        x_train = np.load("arrays/x_train.npy")
-        y_train = np.load("arrays/y_train.npy")
-        x_val = np.load("arrays/x_val.npy")
-        y_val = np.load("arrays/y_val.npy")
-        return x_train,y_train, x_val, y_val
-    else:
-        x_train,y_train, x_val, y_val = loadData()
-        np.save("arrays/x_train",x_train)
-        np.save("arrays/y_train",y_train)
-        np.save("arrays/x_val",x_val)
-        np.save("arrays/y_val",y_val)
-        return x_train,y_train, x_val, y_val
-        
 
 if __name__ == "__main__":
     print("Called from cmd")
     # Change current directory to the Data folder which houses all images
     
-    x_train,y_train, x_val, y_val = load(False)
+    x_train,y_train, x_val, y_val = loadData()
     print(x_train.shape)
     print(y_train.shape)
     #print(m)
