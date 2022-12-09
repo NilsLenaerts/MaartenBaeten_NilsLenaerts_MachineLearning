@@ -28,6 +28,10 @@ import os
 
 progress = 1
 
+def unison_shuffled_copies(a, b):
+    assert len(a) == len(b)
+    p = np.random.permutation(len(a))
+    return a[p], b[p]
 
 def sigmoid(x):
     return 1/(1 + np.exp(-x))
@@ -157,99 +161,86 @@ def nnCostFunction(nn_params,
     return J, grad
 
 
-#gray_arrays, labels,j = loadImages.load(True)
-x_train, y_train, x_val, y_val = loadImages.loadData()
+def main():
+    #Load grayscale images their labes for the train and validation sets
+    x_train, y_train, x_val, y_val = loadImages.loadData()
 
-#X_t = np.concatenate([np.ones((X_size, 1)), gray_arrays], axis=1)
-# print(X_t)
+    #Shuffle the order of the images so it can be split up into train and test sets
+    x_train, y_train = unison_shuffled_copies(x_train, y_train)
+    x_val, y_val = unison_shuffled_copies(x_val,y_val)
 
-#labels_int = labels.astype(int)
-#X = x_train
-#y_t = labels_int
-#y = labels_int
-# print(y)
-# Setup the parameters you will use for this exercise
-input_layer_size = 60*60  # 57600  # Input Images of Digits
-hidden_layer_size = 100   # 25 hidden units
-num_labels = 6         # 10 labels, from 0 to 9
-print(len(y_train))
-print(y_train)
-print('Initializing Neural Network Parameters ...')
-initial_Theta1 = randInitializeWeights(input_layer_size, hidden_layer_size)
-initial_Theta2 = randInitializeWeights(hidden_layer_size, num_labels)
+    testIndex = round(len(x_train)*0.9)
+    x_test = x_train[testIndex:]
+    y_test = y_train[testIndex:]
+    x_train = x_train[:testIndex]
+    y_train = y_train[:testIndex]
 
-# Unroll parameters
-initial_nn_params = np.concatenate(
-    [initial_Theta1.ravel(), initial_Theta2.ravel()], axis=0)
-nn_params = initial_nn_params
+    # Setup the parameters you will use for this exercise
+    input_layer_size = 60*60  # 57600  # Input Images of Digits
+    num_labels = 6         # 6 labels, from d4 to d20
 
+    #Loop through possible lambas and layersizes
+    lambda_vec = [3, 10]
+    theta_vec = [50,150]
+    #lambda_vec = [0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10]
 
-# utils.checkNNGradients(nnCostFunction)
+    #theta_vec = [10,25,50,75,100,150,200,250]
+    
+    
+    
+    accuracyMatrix = np.zeros((len(lambda_vec),len(theta_vec)))
+    for l,lambda_ in enumerate(lambda_vec):
+        for h,hidden_layer_size in enumerate(theta_vec):
+            print("Training with lambda: %f an hiddelLayerSize: %f" % (lambda_,hidden_layer_size))
+            initial_Theta1 = randInitializeWeights(input_layer_size, hidden_layer_size)
+            initial_Theta2 = randInitializeWeights(hidden_layer_size, num_labels)
+            # Unroll parameters
+            initial_nn_params = np.concatenate(
+                [initial_Theta1.ravel(), initial_Theta2.ravel()], axis=0)
 
-#  Check gradients by running checkNNGradients
-lambda_ = 1
-# utils.checkNNGradients(nnCostFunction, lambda_)
+            def costFunction(p): return nnCostFunction(p, input_layer_size,
+                                            hidden_layer_size, num_labels, x_train, y_train, lambda_)
+            options = {'maxfun': 100}
 
-# Also output the costFunction debugging values
-#debug_J, _  = nnCostFunction(nn_params, input_layer_size, hidden_layer_size, num_labels, x_train, y_train, lambda_)
+            # Now, costFunction is a function that takes in only one argument
+            # (the neural network parameters)
+            res = optimize.minimize(costFunction, initial_nn_params,
+                                    jac=True, method='TNC', options=options)
+            print("Optimized")
+            # get the solution of the optimization
+            nn_params = res.x
 
-#print('\n\nCost at (fixed) debugging parameters (w/ lambda = %f): %f ' % (lambda_, debug_J))
-#print('(for lambda = 3, this value should be about 0.576051)')
+            Theta1 = np.reshape(nn_params[:hidden_layer_size * (input_layer_size + 1)],
+                        (hidden_layer_size, (input_layer_size + 1)))
 
-#  After you have completed the assignment, change the maxiter to a larger
-#  value to see how more training helps.
-options = {'maxfun': 800}
+            Theta2 = np.reshape(nn_params[(hidden_layer_size * (input_layer_size + 1)):],
+                        (num_labels, (hidden_layer_size + 1)))
+            pred = utils.predict(Theta1, Theta2, x_train)
+            y = np.zeros(y_train.shape[0])
+            for i in range(y_train.shape[0]):
+                for j in range(len(y_train[i])):
+                    if (y_train[i][j] == 1):
+                        y[i] = j
+            print('Training Set Accuracy: %f' % (np.mean(pred == y) * 100))
 
-#  You should also try different values of lambda
-lambda_ = 3
+            pred = utils.predict(Theta1, Theta2, x_val)
+            
+            y = np.zeros(y_val.shape[0])
+            for i in range(y_val.shape[0]):
+                for j in range(len(y_val[i])):
+                    if (y_val[i][j] == 1):
+                        y[i] = j
+            val_acc = np.mean(pred == y) * 100
+            print(y[0:8])
+            print(pred[0:8])
+            print('Validation Set Accuracy: %f' % (val_acc))
+            accuracyMatrix[l][h] = val_acc
+            np.save("arrays/lamba_%f_hidden_%f"%(lambda_,hidden_layer_size),nn_params,True)
 
-# Create "short hand" for the cost function to be minimized
+    
+    print(accuracyMatrix)
 
+    return
 
-def costFunction(p): return nnCostFunction(p, input_layer_size,
-                                           hidden_layer_size, num_labels, x_train, y_train, lambda_)
-
-
-# Now, costFunction is a function that takes in only one argument
-# (the neural network parameters)
-res = optimize.minimize(costFunction, initial_nn_params,
-                        jac=True, method='TNC', options=options)
-print("Optimized")
-# get the solution of the optimization
-nn_params = res.x
-
-# Obtain Theta1 and Theta2 back from nn_params
-Theta1 = np.reshape(nn_params[:hidden_layer_size * (input_layer_size + 1)],
-                    (hidden_layer_size, (input_layer_size + 1)))
-
-Theta2 = np.reshape(nn_params[(hidden_layer_size * (input_layer_size + 1)):],
-                    (num_labels, (hidden_layer_size + 1)))
-'''
-Theta1 = np.load("arrays/theta1.npy")
-Theta2 = np.load("arrays/theta2.npy")
-'''
-np.save("arrays/theta1_all_60_100_1600.npy", Theta1)
-np.save("arrays/theta2_all_60_100_1600.npy", Theta2)
-
-
-pred = utils.predict(Theta1, Theta2, x_train)
-y = np.zeros(y_train.shape[0])
-for i in range(y_train.shape[0]):
-    for j in range(len(y_train[i])):
-        if (y_train[i][j] == 1):
-            y[i] = j
-
-debug_J, _ = nnCostFunction(nn_params, input_layer_size,
-                            hidden_layer_size, num_labels, x_train, y_train, lambda_)
-print('\n\nCost at (fixed) debugging parameters (w/ lambda = %f): %f ' %
-      (lambda_, debug_J))
-
-print('Training Set Accuracy: %f' % (np.mean(pred == y) * 100))
-
-pred = utils.predict(Theta1, Theta2, x_val)
-y = np.zeros(y_val.shape[0])
-for i in range(y_val.shape[0]):
-    for j in range(len(y_val[i])):
-        if (y_val[i][j] == 1):
-            y[i] = j
-print('Validation Set Accuracy: %f' % (np.mean(pred == y) * 100))
+if __name__ == "__main__":
+    main()
