@@ -156,7 +156,7 @@ def nnCostFunction(nn_params,
     # grad = np.concatenate([Theta1_grad.ravel(order=order), Theta2_grad.ravel(order=order)])
     grad = np.concatenate([Theta1_grad.ravel(), Theta2_grad.ravel()])
     global progress
-    print("Completed Cost ", progress)
+    #print("Completed Cost ", progress)
     progress += 1
     return J, grad
 
@@ -172,8 +172,17 @@ def main():
     testIndex = round(len(x_train)*0.9)
     x_test = x_train[testIndex:]
     y_test = y_train[testIndex:]
-    x_train = x_train[:testIndex]
-    y_train = y_train[:testIndex]
+    x_train_all = x_train[:testIndex]
+    y_train_all = y_train[:testIndex]
+    
+    if(True):
+        x_train = x_train_all[:round(len(x_train_all)/5)]
+        y_train = y_train_all[:round(len(y_train_all)/5)]
+        x_val = x_val[:round(len(x_val)/5)]
+        y_val = y_val[:round(len(y_val)/5)]
+
+
+
 
     # Setup the parameters you will use for this exercise
     input_layer_size = 60*60  # 57600  # Input Images of Digits
@@ -182,9 +191,9 @@ def main():
     #Loop through possible lambas and layersizes
     lambda_vec = [3, 10]
     theta_vec = [50,150]
-    #lambda_vec = [0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10]
+    lambda_vec = [0, 0.01, 0.03, 0.1, 0.3, 1, 3, 10]
 
-    #theta_vec = [10,25,50,75,100,150,200,250]
+    theta_vec = [10,25,50,100,150,200,250]
     
     
     
@@ -200,7 +209,7 @@ def main():
 
             def costFunction(p): return nnCostFunction(p, input_layer_size,
                                             hidden_layer_size, num_labels, x_train, y_train, lambda_)
-            options = {'maxfun': 100}
+            options = {'maxfun': 200}
 
             # Now, costFunction is a function that takes in only one argument
             # (the neural network parameters)
@@ -235,10 +244,52 @@ def main():
             print(pred[0:8])
             print('Validation Set Accuracy: %f' % (val_acc))
             accuracyMatrix[l][h] = val_acc
-            np.save("arrays/lamba_%f_hidden_%f"%(lambda_,hidden_layer_size),nn_params,True)
 
     
     print(accuracyMatrix)
+    accmax = accuracyMatrix.argmax()
+    idx = np.unravel_index(accmax,accuracyMatrix.shape)
+    print(idx)
+    lambdaMax = lambda_vec[idx[0]]
+    hidden_layer_size = theta_vec[idx[1]]
+    hidden_layer_sizeMax = hidden_layer_size
+    initial_Theta1 = randInitializeWeights(input_layer_size, hidden_layer_size)
+    initial_Theta2 = randInitializeWeights(hidden_layer_size, num_labels)
+    # Unroll parameters
+    initial_nn_params = np.concatenate(
+        [initial_Theta1.ravel(), initial_Theta2.ravel()], axis=0)
+
+    def costFunction(p): return nnCostFunction(p, input_layer_size,
+                                    hidden_layer_size, num_labels, x_train_all, y_train_all, lambda_)
+    options = {'maxfun': 800}
+
+    # Now, costFunction is a function that takes in only one argument
+    # (the neural network parameters)
+    res = optimize.minimize(costFunction, initial_nn_params,
+                            jac=True, method='TNC', options=options)
+    print("Optimized")
+    # get the solution of the optimization
+    maxParams = res.x
+    print("Optimized Lambda: %f\nOptimized hidden layer size: %f"%(lambdaMax,hidden_layer_sizeMax))
+    #maxParams = np.load("arrays/lamba_%3f_hidden_%3f.npy"%(lambdaMax,hidden_layer_sizeMax))
+    Theta1 = np.reshape(maxParams[:hidden_layer_sizeMax * (input_layer_size + 1)],
+                        (hidden_layer_sizeMax, (input_layer_size + 1)))
+
+    Theta2 = np.reshape(maxParams[(hidden_layer_sizeMax * (input_layer_size + 1)):],
+                        (num_labels, (hidden_layer_sizeMax + 1)))
+    
+    np.save("arrays/optimized_lamba_%3f_hidden_%3f"%(lambda_,hidden_layer_size),maxParams,True)
+    
+    testPred = utils.predict(Theta1, Theta2, x_test)
+    y = np.zeros(y_test.shape[0])
+    for i in range(y_test.shape[0]):
+        for j in range(len(y_test[i])):
+            if (y_test[i][j] == 1):
+                y[i] = j
+    test_acc = np.mean(testPred == y) * 100
+    print(y[0:8])
+    print(testPred[0:8])
+    print('Test Set Accuracy: %f' % (test_acc))
 
     return
 
