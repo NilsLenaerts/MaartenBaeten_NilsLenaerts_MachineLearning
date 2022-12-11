@@ -2,7 +2,7 @@
 import numpy as np
 from numpy import asarray
 from numpy import savetxt
-
+import time
 # Plotting library
 from matplotlib import pyplot
 import matplotlib.image as mpimg
@@ -156,7 +156,7 @@ def nnCostFunction(nn_params,
     # grad = np.concatenate([Theta1_grad.ravel(order=order), Theta2_grad.ravel(order=order)])
     grad = np.concatenate([Theta1_grad.ravel(), Theta2_grad.ravel()])
     global progress
-    #print("Completed Cost ", progress)
+    print("Completed Cost ", progress)
     progress += 1
     return J, grad
 
@@ -189,8 +189,8 @@ def main():
     num_labels = 6         # 6 labels, from d4 to d20
 
     #Loop through possible lambas and layersizes
-    lambda_vec = [3, 10]
-    theta_vec = [50,150]
+    lambda_vec = [0.01]
+    theta_vec = [200]
     lambda_vec = [0, 0.01, 0.03, 0.1, 0.3, 1, 3, 10]
 
     theta_vec = [10,25,50,100,150,200,250]
@@ -209,7 +209,7 @@ def main():
 
             def costFunction(p): return nnCostFunction(p, input_layer_size,
                                             hidden_layer_size, num_labels, x_train, y_train, lambda_)
-            options = {'maxfun': 200}
+            options = {'maxfun': 600}
 
             # Now, costFunction is a function that takes in only one argument
             # (the neural network parameters)
@@ -247,6 +247,7 @@ def main():
 
     
     print(accuracyMatrix)
+    np.save("arrays/accuracyMatrix_%f"%(time.time()),accuracyMatrix,allow_pickle=True)
     accmax = accuracyMatrix.argmax()
     idx = np.unravel_index(accmax,accuracyMatrix.shape)
     print(idx)
@@ -261,7 +262,7 @@ def main():
 
     def costFunction(p): return nnCostFunction(p, input_layer_size,
                                     hidden_layer_size, num_labels, x_train_all, y_train_all, lambda_)
-    options = {'maxfun': 800}
+    options = {'maxfun': 3000}
 
     # Now, costFunction is a function that takes in only one argument
     # (the neural network parameters)
