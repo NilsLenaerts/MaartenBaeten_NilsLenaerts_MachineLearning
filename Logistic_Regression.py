@@ -52,6 +52,10 @@ def lrCostFunction(theta, X, y, lambda_):
     grad = (1 / m) * (h - y).dot(X)
     grad = grad + (lambda_ / m) * temp
     # =============================================================
+
+    global progress
+    print("Iteration: ",progress)
+    progress +=1
     return J, grad
 
 
@@ -71,7 +75,7 @@ def oneVsAll(X, y, num_labels, lambda_):
     # y = 5000, filled with 0s-9s
     for c in range(num_labels):
         initial_theta = np.zeros(n + 1)  # 401 x 1
-        options = {'maxiter': 1000}
+        options = {'maxiter': 200}
         res = optimize.minimize(lrCostFunction,
                                 initial_theta,
                                 (X, (y == c), lambda_),
