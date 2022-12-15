@@ -28,6 +28,7 @@ import os
 
 progress = 1
 
+# ========================== START CODE FROM ASSIGNMENTS ============================
 
 def lrCostFunction(theta, X, y, lambda_):
     # Initialize some useful values
@@ -70,7 +71,7 @@ def oneVsAll(X, y, num_labels, lambda_):
     # y = 5000, filled with 0s-9s
     for c in range(num_labels):
         initial_theta = np.zeros(n + 1)  # 401 x 1
-        options = {'maxiter': 50}
+        options = {'maxiter': 1000}
         res = optimize.minimize(lrCostFunction,
                                 initial_theta,
                                 (X, (y == c), lambda_),
@@ -108,21 +109,12 @@ def main():
 
     num_labels = 6
 
-    # test values for the parameters theta
-    theta_t = np.zeros(3600)
-
-    # test value for the regularization parameter
-    lambda_t = 0.3
-
-    J, grad = lrCostFunction(theta_t, x_train, y, lambda_t)
-    print('Cost         : {:.6f}'.format(J))
-    print(' [{:.6f}, {:.6f}, {:.6f}, {:.6f}]'.format(*grad))
-
     lambda_ = 0.3
     all_theta = oneVsAll(x_train, y, num_labels, lambda_)
     pred = predictOneVsAll(all_theta, x_train)
     print('Training Set Accuracy: {:.2f}%'.format(
         np.mean(pred == y) * 100))
 
+# ========================== END CODE FROM ASSIGNMENTS ============================
 
 main()

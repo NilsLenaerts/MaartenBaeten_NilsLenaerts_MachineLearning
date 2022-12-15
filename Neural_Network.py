@@ -33,6 +33,8 @@ def unison_shuffled_copies(a, b):
     p = np.random.permutation(len(a))
     return a[p], b[p]
 
+# ========================== START CODE FROM ASSIGNMENTS ============================
+ 
 def sigmoid(x):
     return 1/(1 + np.exp(-x))
 
@@ -160,6 +162,7 @@ def nnCostFunction(nn_params,
     progress += 1
     return J, grad
 
+# ========================== END CODE FROM ASSIGNMENTS ============================
 
 def main():
     #Load grayscale images their labes for the train and validation sets
@@ -175,12 +178,19 @@ def main():
     x_train_all = x_train[:testIndex]
     y_train_all = y_train[:testIndex]
     
+
+    # Reduce training en validation set size to make crossvalidation faster
     if(True):
         x_train = x_train_all[:round(len(x_train_all)/5)]
         y_train = y_train_all[:round(len(y_train_all)/5)]
-        x_val = x_val[:round(len(x_val)/5)]
-        y_val = y_val[:round(len(y_val)/5)]
+        x_val = x_val[:round(len(x_val)/3)]
+        y_val = y_val[:round(len(y_val)/3)]
 
+    # Save the arrays so it can be used in other scripts
+    np.save("arrays/x_test",x_test)
+    np.save("arrays/y_test",y_test)
+    np.save("arrays/x_train",x_train_all)
+    np.save("arrays/y_train",y_train_all)
 
 
 
@@ -189,8 +199,8 @@ def main():
     num_labels = 6         # 6 labels, from d4 to d20
 
     #Loop through possible lambas and layersizes
-    lambda_vec = [0.01]
-    theta_vec = [200]
+    #lambda_vec = [0.3]
+    #theta_vec = [250]
     lambda_vec = [0, 0.01, 0.03, 0.1, 0.3, 1, 3, 10]
 
     theta_vec = [10,25,50,100,150,200,250]
@@ -198,8 +208,11 @@ def main():
     
     
     accuracyMatrix = np.zeros((len(lambda_vec),len(theta_vec)))
+    # Do the cross validation over Lambda and hidden layer size
     for l,lambda_ in enumerate(lambda_vec):
         for h,hidden_layer_size in enumerate(theta_vec):
+            # ========================== START CODE FROM ASSIGNMENTS ============================
+
             print("Training with lambda: %f an hiddelLayerSize: %f" % (lambda_,hidden_layer_size))
             initial_Theta1 = randInitializeWeights(input_layer_size, hidden_layer_size)
             initial_Theta2 = randInitializeWeights(hidden_layer_size, num_labels)
@@ -209,7 +222,7 @@ def main():
 
             def costFunction(p): return nnCostFunction(p, input_layer_size,
                                             hidden_layer_size, num_labels, x_train, y_train, lambda_)
-            options = {'maxfun': 600}
+            options = {'maxfun': 1}
 
             # Now, costFunction is a function that takes in only one argument
             # (the neural network parameters)
@@ -243,17 +256,22 @@ def main():
             print(y[0:8])
             print(pred[0:8])
             print('Validation Set Accuracy: %f' % (val_acc))
+            # ========================== END CODE FROM ASSIGNMENTS ============================
+
             accuracyMatrix[l][h] = val_acc
 
     
     print(accuracyMatrix)
-    np.save("arrays/accuracyMatrix_%f"%(time.time()),accuracyMatrix,allow_pickle=True)
+    #np.save("arrays/accuracyMatrix_%f"%(time.time()),accuracyMatrix,allow_pickle=True)
     accmax = accuracyMatrix.argmax()
     idx = np.unravel_index(accmax,accuracyMatrix.shape)
     print(idx)
     lambdaMax = lambda_vec[idx[0]]
     hidden_layer_size = theta_vec[idx[1]]
     hidden_layer_sizeMax = hidden_layer_size
+
+# ========================== START CODE FROM ASSIGNMENTS ============================
+
     initial_Theta1 = randInitializeWeights(input_layer_size, hidden_layer_size)
     initial_Theta2 = randInitializeWeights(hidden_layer_size, num_labels)
     # Unroll parameters
@@ -264,11 +282,9 @@ def main():
                                     hidden_layer_size, num_labels, x_train_all, y_train_all, lambda_)
     options = {'maxfun': 3000}
 
-    # Now, costFunction is a function that takes in only one argument
-    # (the neural network parameters)
+    # Train NN with optimized parameters
     res = optimize.minimize(costFunction, initial_nn_params,
                             jac=True, method='TNC', options=options)
-    print("Optimized")
     # get the solution of the optimization
     maxParams = res.x
     print("Optimized Lambda: %f\nOptimized hidden layer size: %f"%(lambdaMax,hidden_layer_sizeMax))
@@ -279,7 +295,7 @@ def main():
     Theta2 = np.reshape(maxParams[(hidden_layer_sizeMax * (input_layer_size + 1)):],
                         (num_labels, (hidden_layer_sizeMax + 1)))
     
-    np.save("arrays/optimized_lamba_%3f_hidden_%3f"%(lambda_,hidden_layer_size),maxParams,True)
+    np.save("arrays/optimized_lamba_%3f_hidden_%3f"%(lambdaMax,hidden_layer_sizeMax),maxParams,True)
     
     testPred = utils.predict(Theta1, Theta2, x_test)
     y = np.zeros(y_test.shape[0])
@@ -291,6 +307,9 @@ def main():
     print(y[0:8])
     print(testPred[0:8])
     print('Test Set Accuracy: %f' % (test_acc))
+
+# ========================== END CODE FROM ASSIGNMENTS ============================
+
 
     return
 
