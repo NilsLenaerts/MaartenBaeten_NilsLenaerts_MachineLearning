@@ -75,12 +75,13 @@ def oneVsAll(X, y, num_labels, lambda_):
     # y = 5000, filled with 0s-9s
     for c in range(num_labels):
         initial_theta = np.zeros(n + 1)  # 401 x 1
-        options = {'maxiter': 200}
+        options = {'maxfun': 800}
+        print("Training for label:",c)
         res = optimize.minimize(lrCostFunction,
                                 initial_theta,
                                 (X, (y == c), lambda_),
                                 jac=True,
-                                method='CG',
+                                method='TNC',
                                 options=options)
         all_theta[c] = res.x
     # ============================================================
@@ -110,14 +111,18 @@ def main():
         for j in range(len(y_train[i])):
             if (y_train[i][j] == 1):
                 y[i] = j
-
+    yval = np.zeros(y_val.shape[0])
+    for i in range(y_val.shape[0]):
+        for j in range(len(y_val[i])):
+            if (y_val[i][j] == 1):
+                yval[i] = j
     num_labels = 6
 
     lambda_ = 0.3
     all_theta = oneVsAll(x_train, y, num_labels, lambda_)
-    pred = predictOneVsAll(all_theta, x_train)
+    pred = predictOneVsAll(all_theta, x_val)
     print('Training Set Accuracy: {:.2f}%'.format(
-        np.mean(pred == y) * 100))
+        np.mean(pred == yval) * 100))
 
 # ========================== END CODE FROM ASSIGNMENTS ============================
 

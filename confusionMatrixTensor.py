@@ -63,7 +63,6 @@ def main():
     print(("Actual d10 value: %d, predicted value: %d")%(np.sum(y==3),np.sum(predict==3)))
     print(("Actual d12 value: %d, predicted value: %d")%(np.sum(y==4),np.sum(predict==4)))
     print(("Actual d20 value: %d, predicted value: %d")%(np.sum(y==5),np.sum(predict==5)))
-    print(y.shape)
 
     
 
