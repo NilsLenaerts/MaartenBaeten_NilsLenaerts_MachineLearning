@@ -10,7 +10,7 @@ def unison_shuffled_copies(a, b):
 
 def main():
     
-    converter = tf.lite.TFLiteConverter.from_saved_model("Data/TensorModels/model_3")
+    converter = tf.lite.TFLiteConverter.from_saved_model("Data/TensorModels/model_4")
     tflite_model = converter.convert()
 
     with open("Data/TensorModels/model.tflite","wb") as f:
